@@ -3,81 +3,47 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>API Response Color</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f4;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-  }
-
-  .response-box {
-    width: 200px;
-    height: 200px;
-    border-radius: 8px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 24px;
-  }
-
-  .success {
-    background-color: #4CAF50; /* Green */
-    color: white;
-  }
-
-  .error {
-    background-color: #f44336; /* Red */
-    color: white;
-  }
-</style>
+<title>ChatGPT Example</title>
 </head>
 <body>
-<div class="response-box" id="responseBox">
-  Waiting for API response...
-</div>
+<h1>ChatGPT Example</h1>
+<div id="chat-container"></div>
+<input type="text" id="user-input" placeholder="Type your message...">
+<button onclick="sendMessage()">Send</button>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script>
-  // Function to call the actual API and get response status
-  const callAPIAndGetStatus = async () => {
-    try {
-      const response = await fetch('https://api.openai.com/v1/engines/davinci/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': 'Bearer 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' // Replace with your actual API key
-        },
-        body: JSON.stringify({
-          prompt: "Hello, I'm using OpenAI API!",
-          max_tokens: 50
-        })
-      });
-      return response.status; // Return the HTTP status code from the API response
-    } catch (error) {
-      console.error('Error:', error);
-      return 500; // Return 500 for error status code
+async function sendMessage() {
+  const userInput = document.getElementById('user-input').value;
+  const chatContainer = document.getElementById('chat-container');
+  
+  // Display user message
+  chatContainer.innerHTML += `<div><strong>You:</strong> ${userInput}</div>`;
+  
+  // Send request to ChatGPT API
+  const response = await axios.post('https://api.openai.com/v1/chat/completions', {
+    "model": "gpt-3.5-turbo",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a chatbot assistant, ready to help with your queries."
+      },
+      {
+        "role": "user",
+        "content": userInput
+      }
+    ]
+  }, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer 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' // Replace with your OpenAI API key
     }
-  };
+  });
 
-  // Function to update response box color based on API response
-  const updateResponseBoxColor = async () => {
-    const responseBox = document.getElementById('responseBox');
-    const apiResponse = await callAPIAndGetStatus(); // Call the API and get response status
-
-    if (apiResponse === 200) {
-      responseBox.classList.add('success');
-      responseBox.textContent = 'API response successful';
-    } else {
-      responseBox.classList.add('error');
-      responseBox.textContent = 'API response failed';
-    }
-  };
-
-  // Call the function to update response box color
-  updateResponseBoxColor();
+  // Display ChatGPT response
+  const chatGptResponse = response.data.choices[0].message.content;
+  chatContainer.innerHTML += `<div><strong>ChatGPT:</strong> ${chatGptResponse}</div>`;
+}
 </script>
 </body>
 </html>
